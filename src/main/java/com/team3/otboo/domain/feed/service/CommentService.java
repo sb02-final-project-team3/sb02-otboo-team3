@@ -5,11 +5,12 @@ import com.team3.otboo.domain.feed.dto.CommentDtoCursorResponse;
 import com.team3.otboo.domain.feed.entity.Comment;
 import com.team3.otboo.domain.feed.entity.FeedCommentCount;
 import com.team3.otboo.domain.feed.mapper.CommentMapper;
-import com.team3.otboo.domain.feed.repository.CommentRepository;
-import com.team3.otboo.domain.feed.repository.FeedCommentCountRepository;
 import com.team3.otboo.domain.feed.repository.FeedRepository;
+import com.team3.otboo.domain.feed.repository.comment.CommentRepository;
+import com.team3.otboo.domain.feed.repository.comment.FeedCommentCountRepository;
 import com.team3.otboo.domain.feed.service.request.CommentCreateRequest;
 import com.team3.otboo.domain.user.entity.User;
+import com.team3.otboo.domain.user.enums.SortDirection;
 import com.team3.otboo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
@@ -20,7 +21,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.query.SortDirection;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,8 +111,8 @@ public class CommentService {
 		String nextCursor = null;
 		UUID nextIdAfter = null;
 
-		if (hasNext && !comments.isEmpty()) {
-			Comment lastElements = comments.get(limit - 1);
+		if (hasNext && !currentPage.isEmpty()) {
+			Comment lastElements = currentPage.getLast(); // api test 다시 해보기 .
 			nextCursor = lastElements.getCreatedAt().toString();
 			nextIdAfter = lastElements.getId();
 		}
@@ -138,5 +138,9 @@ public class CommentService {
 		}
 
 		return comment;
+	}
+
+	public void deleteAllByFeedId(UUID feedId) {
+		commentRepository.deleteAllByFeedId(feedId);
 	}
 }

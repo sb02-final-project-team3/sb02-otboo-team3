@@ -1,4 +1,4 @@
-package com.team3.otboo.domain.feed.repository;
+package com.team3.otboo.domain.feed.repository.comment;
 
 import com.team3.otboo.domain.feed.entity.FeedCommentCount;
 import java.util.UUID;
