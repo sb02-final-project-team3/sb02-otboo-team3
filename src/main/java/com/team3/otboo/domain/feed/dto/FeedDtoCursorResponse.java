@@ -1,6 +1,5 @@
-package com.team3.otboo.domain.feed.service.response;
+package com.team3.otboo.domain.feed.dto;
 
-import com.team3.otboo.domain.feed.dto.FeedDto;
 import com.team3.otboo.domain.user.enums.SortDirection;
 import java.util.List;
 import java.util.UUID;

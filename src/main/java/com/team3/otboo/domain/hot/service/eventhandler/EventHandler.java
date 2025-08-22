@@ -1,4 +1,4 @@
-package com.team3.otboo.domain.hot.service.event.handler;
+package com.team3.otboo.domain.hot.service.eventhandler;
 
 import com.team3.otboo.common.event.Event;
 import com.team3.otboo.common.event.EventPayload;

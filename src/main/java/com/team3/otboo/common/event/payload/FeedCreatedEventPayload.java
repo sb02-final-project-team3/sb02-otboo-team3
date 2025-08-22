@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FeedCreatedEventPayload implements EventPayload {
 
-	private UUID id; // feedId
+	private UUID id;
 	private Instant createdAt;
 	private Instant updatedAt;
 	private UUID authorId;
