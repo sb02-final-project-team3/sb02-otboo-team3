@@ -12,7 +12,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
@@ -29,20 +28,18 @@ public class RedisConfig {
 	@Value("${spring.data.redis.port}")
 	private int port;
 
+	@Value("${spring.data.redis.database:0}") private int dbIndex; // 배포=0
+
 	@Bean
 	@Qualifier("chatPubSub")
 	public RedisConnectionFactory chatPubSubFactory() {
 		RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+		configuration.setDatabase(dbIndex);
 		configuration.setHostName(host);
 		configuration.setPort(port);
-
-		LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(configuration);
-		// Pub/Sub 과 일반 명령어의 충돌을 막기 위해 커넥션 공유를 비활성화
-		lettuceConnectionFactory.setShareNativeConnection(false);
-		return lettuceConnectionFactory;
+		return new LettuceConnectionFactory(configuration);
 	}
 
-	// publish 객체 .
 	@Bean
 	@Qualifier("chatPubSub")
 	public RedisTemplate<String, Object> redisTemplate(
@@ -72,19 +69,5 @@ public class RedisConfig {
 	@Bean
 	public MessageListenerAdapter dmListenerAdapter(SubscribeService subscribeService) {
 		return new MessageListenerAdapter(subscribeService, "onMessage");
-	}
-
-	@Bean
-	public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
-		stringRedisTemplate.setConnectionFactory(redisConnectionFactory);
-
-		// Redis key와 value 직렬화 방식 설정
-		stringRedisTemplate.setKeySerializer(new StringRedisSerializer());
-		stringRedisTemplate.setValueSerializer(new StringRedisSerializer());
-		stringRedisTemplate.setHashKeySerializer(new StringRedisSerializer());
-		stringRedisTemplate.setHashValueSerializer(new StringRedisSerializer());
-
-		return stringRedisTemplate;
 	}
 }

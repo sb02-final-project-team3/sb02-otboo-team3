@@ -12,6 +12,8 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      database: 0                  # 배포는 항상 0
+      cache-prefix: "otboo:cache:" # 캐시 키 프리픽스
       ssl:
         enabled: true
   jpa:
@@ -74,6 +76,10 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       enable-auto-commit: false
+
+  elasticsearch:
+    uris:
+      ${ELASTICSEARCH_URIS:localhost:9200}
 
 server:
   port: 8080
