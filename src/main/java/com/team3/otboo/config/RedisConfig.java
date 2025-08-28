@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
@@ -34,7 +35,11 @@ public class RedisConfig {
 		RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
 		configuration.setHostName(host);
 		configuration.setPort(port);
-		return new LettuceConnectionFactory(configuration);
+
+		LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(configuration);
+		// Pub/Sub 과 일반 명령어의 충돌을 막기 위해 커넥션 공유를 비활성화
+		lettuceConnectionFactory.setShareNativeConnection(false);
+		return lettuceConnectionFactory;
 	}
 
 	// publish 객체 .
@@ -69,31 +74,17 @@ public class RedisConfig {
 		return new MessageListenerAdapter(subscribeService, "onMessage");
 	}
 
-	// 토큰 관리용
 	@Bean
-	@Primary
-	public RedisConnectionFactory tokenRedisConnectionFactory() {
-		RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-		configuration.setHostName(host);
-		configuration.setPort(port);
-		return new LettuceConnectionFactory(configuration);
-	}
+	public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
+		stringRedisTemplate.setConnectionFactory(redisConnectionFactory);
 
-	@Bean
-	@Primary
-	public RedisTemplate<String, Object> tokenRedisTemplate(
-			RedisConnectionFactory redisConnectionFactory){
-		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setConnectionFactory(redisConnectionFactory);
+		// Redis key와 value 직렬화 방식 설정
+		stringRedisTemplate.setKeySerializer(new StringRedisSerializer());
+		stringRedisTemplate.setValueSerializer(new StringRedisSerializer());
+		stringRedisTemplate.setHashKeySerializer(new StringRedisSerializer());
+		stringRedisTemplate.setHashValueSerializer(new StringRedisSerializer());
 
-		// key: string, value: 일반 Object를 JSON으로 직렬화
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
-
-		// Hash key/value에 대한 직렬화 설정
-		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-		redisTemplate.setHashValueSerializer(new StringRedisSerializer());
-
-		return redisTemplate;
+		return stringRedisTemplate;
 	}
 }
