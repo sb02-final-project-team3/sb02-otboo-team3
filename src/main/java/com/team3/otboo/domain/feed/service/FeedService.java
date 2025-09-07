@@ -86,11 +86,17 @@ public class FeedService {
 		if (result == 0) {
 			feedCountRepository.save(FeedCount.init(1L));
 		}
-
-		log.info("[FeedService.create] feed created. feedId: " + feed.getId());
+		
 		Weather weather = weatherRepository.findById(feed.getWeatherId())
 			.orElseThrow(EntityNotFoundException::new);
 
+		// 그냥 카프카로 퍼블리시
+		// 그러면 각 시스템이 알아서 이벤트를 받아서 처리함
+		// 근데 카프카가 없으면
+		// 1. 메인 DB에 저장
+		// 2. 조회용 DB 에 저장
+		// 3. 엘라스틱 서치에 데이터 밀어넣어야함 .
+		// 4. 피드 생성시 알림까지
 		outboxEventPublisher.publish(
 			EventType.FEED_CREATED,
 			FeedCreatedEventPayload.builder()
