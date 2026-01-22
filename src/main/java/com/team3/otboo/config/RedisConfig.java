@@ -70,32 +70,4 @@ public class RedisConfig {
 	public MessageListenerAdapter dmListenerAdapter(SubscribeService subscribeService) {
 		return new MessageListenerAdapter(subscribeService, "onMessage");
 	}
-
-	// 토큰 관리용
-	@Bean
-	@Primary
-	public RedisConnectionFactory tokenRedisConnectionFactory() {
-		RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-		configuration.setHostName(host);
-		configuration.setPort(port);
-		return new LettuceConnectionFactory(configuration);
-	}
-
-	@Bean
-	@Primary
-	public RedisTemplate<String, Object> tokenRedisTemplate(
-		RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setConnectionFactory(redisConnectionFactory);
-
-		// key: string, value: 일반 Object를 JSON으로 직렬화
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
-
-		// Hash key/value에 대한 직렬화 설정
-		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-		redisTemplate.setHashValueSerializer(new StringRedisSerializer());
-
-		return redisTemplate;
-	}
 }

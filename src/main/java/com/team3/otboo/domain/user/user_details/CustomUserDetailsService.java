@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// username -> email(고유값)
 		User user = userRepository.findByEmail(username).orElseThrow(
-			() -> new EntityNotFoundException("user not found. username: " + username));
+			() -> new EntityNotFoundException("User not found. Email: " + username));
 
 		return new CustomUserDetails(user);
 	}
